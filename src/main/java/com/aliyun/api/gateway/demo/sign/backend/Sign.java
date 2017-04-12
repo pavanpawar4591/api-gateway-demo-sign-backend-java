@@ -35,33 +35,36 @@ import java.util.Map;
 import java.util.TreeMap;
 
 /**
- * 后端服务签名示例
+ * å�Žç«¯æœ�åŠ¡ç­¾å��ç¤ºä¾‹
  */
 public class Sign {
-    //API网关中所有参与签名计算的HTTP请求头的Key,以应为逗号分割
+    //All key entries in the HTTP request header that are involved in the signature calculation should be separated by commas
     private static final String CA_PROXY_SIGN_HEADERS = "X-Ca-Proxy-Signature-Headers";
-    //API网关计算的签名
+    //Signature of the API gateway calculation
     private static final String CA_PROXY_SIGN = "X-Ca-Proxy-Signature";
-    //API网关用于计算签名的密钥Key
+    //The key used by the API gateway to calculate the signature
     private static final String CA_PROXY_SIGN_SECRET_KEY = "X-Ca-Proxy-Signature-Secret-Key";
-    //签名算法HmacSha256
+    //Signature algorithm HmacSha256
     public static final String HMAC_SHA256 = "HmacSHA256";
-    //换行符
+    //Line breaks
+
     private static char LF = '\n';
-    //编码
+    //coding
     private static final String ENCODING = "UTF-8";
     //HTTP POST
     private static final String HTTP_METHOD_POST = "post";
     //HTTP PUT
     private static final String HTTP_METHOD_PUT = "put";
-    //HTTP HEADER是否转换成小写（部分WEB容器中接受到的所有HEADER的KEY都是小写）
+    //HTTP HEADER is converted to lowercase (part of the WEB container to receive all the HEADER KEY are lowercase
     private static final boolean HTTP_HEADER_TO_LOWER_CASE = true;
 
-    //签名密钥Map,用于存储多对服务端签名计算密钥,一旦正在使用的密钥泄露,只需要将密钥列表中的其他密钥配置到网关即可进行密钥热替换
+    //signature key map, used to store many pairs of server-side signature calculation key, once the key is being used to leak, only need to key list of other keys configured to the gateway can be key hot replacement
+
     private static Map<String, String> signSecretMap = new HashMap<String, String>();
 
     static {
-        //TODO：修改为自己的密钥组合
+        //// TODO: modify it to your own key combination
+
         signSecretMap.put("DemoKey1", "DemoSecret1");
         signSecretMap.put("DemoKey2", "DemoSecret2");
         signSecretMap.put("DemoKey3", "DemoSecret3");
@@ -92,23 +95,25 @@ public class Sign {
         byte[] inputStreamBytes = new byte[]{};
 
         String gatewaySign = headers.get(CA_PROXY_SIGN);
-        System.out.println("API网关签名:" + gatewaySign);
+        System.out.println("API Gateway Signature :" + gatewaySign);
 
         String serviceSign = serviceSign(uri, httpMethod, headers, paramsMap, inputStreamBytes);
-        System.out.println("服务端签名:" + serviceSign);
+        System.out.println("Server signature:" + serviceSign);
 
-        System.out.println("签名是否相同:" + gatewaySign.equals(serviceSign));
+        System.out.println("Whether the signature is the same:" + gatewaySign.equals(serviceSign));
     }
 
     /**
-     * 计算HTTP请求签名
+     * Calculate the HTTP request signature
      *
-     * @param uri              原始HTTP请求PATH（不包含Query）
-     * @param httpMethod       原始HTTP请求方法
-     * @param headers          原始HTTP请求所有请求头
-     * @param paramsMap        原始HTTP请求所有Query+Form参数
-     * @param inputStreamBytes 原始HTTP请求Body体（仅当请求为POST/PUT且非表单请求才需要设置此属性,表单形式的需要将参数放到paramsMap中）
-     * @return 签名结果
+     * @param uri             Raw HTTP request PATH (does not include Query)
+
+     * @param httpMethod       Raw HTTP request method
+
+     * @param headers          Raw HTTP requests all request headers
+     * @param paramsMap        åŽŸå§‹HTTPè¯·æ±‚æ‰€æœ‰Query+Formå�‚æ•°
+     * @param inputStreamBytes åŽŸå§‹HTTPè¯·æ±‚Bodyä½“ï¼ˆä»…å½“è¯·æ±‚ä¸ºPOST/PUTä¸”é�žè¡¨å�•è¯·æ±‚æ‰�éœ€è¦�è®¾ç½®æ­¤å±žæ€§,è¡¨å�•å½¢å¼�çš„éœ€è¦�å°†å�‚æ•°æ”¾åˆ°paramsMapä¸­ï¼‰
+     * @return ç­¾å��ç»“æžœ
      * @throws Exception
      */
     public static String serviceSign(String uri, String httpMethod, Map<String, String> headers, Map<String, Object> paramsMap, byte[] inputStreamBytes) throws Exception {
@@ -127,11 +132,11 @@ public class Sign {
     }
 
     /**
-     * 构建BodyMd5
+     * æž„å»ºBodyMd5
      *
-     * @param httpMethod       HTTP请求方法
-     * @param inputStreamBytes HTTP请求Body体字节数组
-     * @return Body Md5值
+     * @param httpMethod       HTTPè¯·æ±‚æ–¹æ³•
+     * @param inputStreamBytes HTTPè¯·æ±‚Bodyä½“å­—èŠ‚æ•°ç»„
+     * @return Body Md5å€¼
      * @throws IOException
      */
     private static String buildBodyMd5(String httpMethod, byte[] inputStreamBytes) throws IOException {
@@ -152,7 +157,7 @@ public class Sign {
     }
 
     /**
-     * 将Map转换为用&及=拼接的字符串
+     * å°†Mapè½¬æ�¢ä¸ºç”¨&å�Š=æ‹¼æŽ¥çš„å­—ç¬¦ä¸²
      */
     private static String buildMapToSign(Map<String, Object> paramMap) {
         StringBuilder builder = new StringBuilder();
@@ -190,13 +195,13 @@ public class Sign {
     }
 
     /**
-     * 构建参与签名的HTTP头
+     * æž„å»ºå�‚ä¸Žç­¾å��çš„HTTPå¤´
      * <pre>
-     * 传入的Headers必须将默认的ISO-8859-1转换为UTF-8以支持中文
+     * ä¼ å…¥çš„Headerså¿…é¡»å°†é»˜è®¤çš„ISO-8859-1è½¬æ�¢ä¸ºUTF-8ä»¥æ”¯æŒ�ä¸­æ–‡
      * </pre>
      *
-     * @param headers HTTP请求头
-     * @return 所有参与签名计算的HTTP请求头
+     * @param headers HTTPè¯·æ±‚å¤´
+     * @return æ‰€æœ‰å�‚ä¸Žç­¾å��è®¡ç®—çš„HTTPè¯·æ±‚å¤´
      */
     private static Map<String, String> buildHeadersToSign(Map<String, String> headers) {
         Map<String, String> headersToSignMap = new TreeMap<String, String>();
@@ -213,13 +218,13 @@ public class Sign {
     }
 
     /**
-     * 组织待计算签名字符串
+     * ç»„ç»‡å¾…è®¡ç®—ç­¾å��å­—ç¬¦ä¸²
      *
-     * @param headers        HTTP请求头
-     * @param resourceToSign Uri+请求参数的签名字符串
-     * @param method         HTTP方法
-     * @param bodyMd5        Body Md5值
-     * @return 待计算签名字符串
+     * @param headers        HTTPè¯·æ±‚å¤´
+     * @param resourceToSign Uri+è¯·æ±‚å�‚æ•°çš„ç­¾å��å­—ç¬¦ä¸²
+     * @param method         HTTPæ–¹æ³•
+     * @param bodyMd5        Body Md5å€¼
+     * @return å¾…è®¡ç®—ç­¾å��å­—ç¬¦ä¸²
      */
     private static String buildStringToSign(Map<String, String> headers, String resourceToSign, String method, String bodyMd5) {
         StringBuilder sb = new StringBuilder();
@@ -235,10 +240,10 @@ public class Sign {
     }
 
     /**
-     * 组织Headers签名签名字符串
+     * ç»„ç»‡Headersç­¾å��ç­¾å��å­—ç¬¦ä¸²
      *
-     * @param headers HTTP请求头
-     * @return Headers签名签名字符串
+     * @param headers HTTPè¯·æ±‚å¤´
+     * @return Headersç­¾å��ç­¾å��å­—ç¬¦ä¸²
      */
     private static String buildHeaders(Map<String, String> headers) {
         StringBuilder sb = new StringBuilder();
@@ -251,11 +256,11 @@ public class Sign {
     }
 
     /**
-     * 组织Uri+请求参数的签名字符串
+     * ç»„ç»‡Uri+è¯·æ±‚å�‚æ•°çš„ç­¾å��å­—ç¬¦ä¸²
      *
-     * @param uri       HTTP请求uri,不包含Query
-     * @param paramsMap HTTP请求所有参数（Query+Form参数）
-     * @return Uri+请求参数的签名字符串
+     * @param uri       HTTPè¯·æ±‚uri,ä¸�åŒ…å�«Query
+     * @param paramsMap HTTPè¯·æ±‚æ‰€æœ‰å�‚æ•°ï¼ˆQuery+Formå�‚æ•°ï¼‰
+     * @return Uri+è¯·æ±‚å�‚æ•°çš„ç­¾å��å­—ç¬¦ä¸²
      */
     private static String buildResource(String uri, Map<String, Object> paramsMap) {
         StringBuilder builder = new StringBuilder();
@@ -268,7 +273,7 @@ public class Sign {
         sortMap.putAll(paramsMap);
 
 
-        // 有Query+Form参数
+        // æœ‰Query+Formå�‚æ•°
         if (sortMap.size() > 0) {
             builder.append('?');
             builder.append(buildMapToSign(sortMap));
@@ -278,9 +283,9 @@ public class Sign {
     }
 
     /**
-     * 先进行MD5摘要再进行Base64编码获取摘要字符串
+     * å…ˆè¿›è¡ŒMD5æ‘˜è¦�å†�è¿›è¡ŒBase64ç¼–ç �èŽ·å�–æ‘˜è¦�å­—ç¬¦ä¸²
      *
-     * @param bytes 待计算字节数组
+     * @param bytes å¾…è®¡ç®—å­—èŠ‚æ•°ç»„
      * @return
      */
     public static String base64AndMD5(byte[] bytes) {
